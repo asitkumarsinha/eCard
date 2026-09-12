@@ -29,13 +29,12 @@ export class App {
   textSize = 46;
   textAlign: CanvasTextAlign = 'center';
   textPosition = 620;
-  login = { username: 'admin', password: 'admin123' };
+  login = { username: '', password: '' };
   token = sessionStorage.getItem('ecard-admin-token') || '';
   categoryForm = { name: '', slug: '', description: '', sortOrder: 0, isPublished: true };
   email = '';
   uploadForm = { categoryId: '', title: '', altText: '', licenseSource: 'Original eCard artwork', licenseType: 'Original', attributionText: '© eCard', reuseConfirmed: false };
-  passwordChange = { currentPassword: '', newPassword: '', code: '' };
-  codeRequested = false;
+  passwordChange = { currentPassword: '', newPassword: '' };
   selectedFile?: File;
 
   ngOnInit() {
@@ -183,20 +182,13 @@ export class App {
       error: () => this.visitorLogs.set([])
     });
   }
-  requestPasswordCode() {
-    this.http.post<any>('/api/admin/password-change/request', {
+  changePassword() {
+    this.http.post<any>('/api/admin/password-change', {
       currentPassword: this.passwordChange.currentPassword,
       newPassword: this.passwordChange.newPassword
     }, this.headers()).subscribe({
-      next: result => { this.codeRequested = true; this.notice.set(result.message); },
-      error: err => this.notice.set(err.error?.message || 'Verification code could not be requested.')
-    });
-  }
-  confirmPasswordChange() {
-    this.http.post<any>('/api/admin/password-change/confirm', { code: this.passwordChange.code }, this.headers()).subscribe({
       next: result => {
-        this.passwordChange = { currentPassword: '', newPassword: '', code: '' };
-        this.codeRequested = false;
+        this.passwordChange = { currentPassword: '', newPassword: '' };
         this.notice.set(result.message);
       },
       error: err => this.notice.set(err.error?.message || 'Password could not be updated.')

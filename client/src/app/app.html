@@ -146,18 +146,12 @@
         <form (ngSubmit)="uploadTemplate()"><h2>Upload template</h2><select [(ngModel)]="uploadForm.categoryId" name="templateCategory" required><option value="">Choose category</option>@for (c of adminCategories(); track c.id) { <option [value]="c.id">{{ c.name }}</option> }</select><input [(ngModel)]="uploadForm.title" name="title" placeholder="Template title" required><input [(ngModel)]="uploadForm.altText" name="alt" placeholder="Alt text" required><input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" (change)="onFile($event)" required><input [(ngModel)]="uploadForm.licenseSource" name="source" placeholder="License source" required><input [(ngModel)]="uploadForm.licenseType" name="license" placeholder="License type" required><input [(ngModel)]="uploadForm.attributionText" name="attribution" placeholder="Attribution text"><label class="check"><input [(ngModel)]="uploadForm.reuseConfirmed" name="reuse" type="checkbox"> I confirm this image is free to use.</label><button class="primary">Upload template</button></form>
       </div>
       <div class="admin-grid security-grid">
-        <form (ngSubmit)="requestPasswordCode()">
+        <form (ngSubmit)="changePassword()">
           <p class="eyebrow">ACCOUNT SECURITY</p><h2>Change password</h2>
-          <p class="form-help">A 4-digit code will be sent only to asitkumarsinha@gmail.com.</p>
+          <p class="form-help">Enter your current password and a new password with at least 8 characters.</p>
           <input [(ngModel)]="passwordChange.currentPassword" name="currentPassword" type="password" placeholder="Current password" autocomplete="current-password" required>
           <input [(ngModel)]="passwordChange.newPassword" name="newPassword" type="password" minlength="8" placeholder="New password (minimum 8 characters)" autocomplete="new-password" required>
-          <button class="primary">Send verification code</button>
-        </form>
-        <form (ngSubmit)="confirmPasswordChange()">
-          <p class="eyebrow">VERIFY CODE</p><h2>Confirm update</h2>
-          <p class="form-help">The code expires after 10 minutes. You have a maximum of 5 attempts.</p>
-          <input [(ngModel)]="passwordChange.code" name="verificationCode" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" placeholder="4-digit code" [disabled]="!codeRequested" required>
-          <button class="primary" [disabled]="!codeRequested">Update password</button>
+          <button class="primary">Update password</button>
         </form>
       </div>
       <h2>Categories</h2><div class="admin-list">@for (c of adminCategories(); track c.id) { <div><span><strong>{{ c.name }}</strong><small>{{ c.is_published ? 'Published' : 'Hidden' }}</small></span><button (click)="deleteCategory(c.id)">Delete</button></div> }</div>

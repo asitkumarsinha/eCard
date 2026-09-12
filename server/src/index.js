@@ -1,7 +1,6 @@
 import 'dotenv/config';
 import bcrypt from 'bcryptjs';
 import cors from 'cors';
-import crypto from 'node:crypto';
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import multer from 'multer';
@@ -20,7 +19,6 @@ const db = new sqlite3.Database(path.join(dataDir, 'ecard.db'));
 const app = express();
 const port = process.env.PORT || 3000;
 const secret = process.env.JWT_SECRET || 'change-this-development-secret';
-const adminVerificationEmail = process.env.ADMIN_VERIFICATION_EMAIL || 'asitkumarsinha@gmail.com';
 
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
@@ -161,63 +159,20 @@ app.get('/api/admin/visitor-logs', auth, async (_req, res) => {
   ));
 });
 
-app.post('/api/admin/password-change/request', auth, async (req, res) => {
+app.post('/api/admin/password-change', auth, async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
     if (typeof newPassword !== 'string' || newPassword.length < 8) {
       return res.status(400).json({ message: 'New password must contain at least 8 characters.' });
     }
-    if (!process.env.SMTP_HOST) {
-      return res.status(503).json({ message: 'Password verification email is not configured. Add SMTP settings first.' });
-    }
     const user = await get('SELECT * FROM users WHERE id = ?', [req.user.id]);
     if (!user || !(await bcrypt.compare(currentPassword || '', user.password_hash))) {
       return res.status(401).json({ message: 'Current password is incorrect.' });
     }
-    const code = crypto.randomInt(1000, 10000).toString();
-    await run('DELETE FROM password_change_codes WHERE user_id = ?', [user.id]);
-    await run(
-      `INSERT INTO password_change_codes (user_id, code_hash, new_password_hash, expires_at)
-       VALUES (?, ?, ?, datetime('now', '+10 minutes'))`,
-      [user.id, await bcrypt.hash(code, 12), await bcrypt.hash(newPassword, 12)]
-    );
-    await smtpTransport().sendMail({
-      from: process.env.SMTP_FROM || process.env.SMTP_USER,
-      to: adminVerificationEmail,
-      subject: 'eCard admin password verification code',
-      text: `Your eCard admin password verification code is ${code}. It expires in 10 minutes. If you did not request this change, ignore this email.`
-    });
-    res.json({ message: `A 4-digit verification code was sent to ${adminVerificationEmail}.` });
-  } catch (error) {
-    console.error('Password change request failed:', error);
-    res.status(500).json({ message: 'The verification code could not be sent. Please try again.' });
-  }
-});
-
-app.post('/api/admin/password-change/confirm', auth, async (req, res) => {
-  try {
-    const code = String(req.body.code || '').trim();
-    if (!/^\d{4}$/.test(code)) return res.status(400).json({ message: 'Enter the 4-digit verification code.' });
-    const request = await get(
-      `SELECT * FROM password_change_codes
-       WHERE user_id = ? AND expires_at > CURRENT_TIMESTAMP
-       ORDER BY created_at DESC LIMIT 1`,
-      [req.user.id]
-    );
-    if (!request) return res.status(400).json({ message: 'The code expired. Request a new code.' });
-    if (request.attempts >= 5) {
-      await run('DELETE FROM password_change_codes WHERE id = ?', [request.id]);
-      return res.status(429).json({ message: 'Too many incorrect attempts. Request a new code.' });
-    }
-    if (!(await bcrypt.compare(code, request.code_hash))) {
-      await run('UPDATE password_change_codes SET attempts = attempts + 1 WHERE id = ?', [request.id]);
-      return res.status(400).json({ message: 'The verification code is incorrect.' });
-    }
-    await run('UPDATE users SET password_hash = ? WHERE id = ?', [request.new_password_hash, req.user.id]);
-    await run('DELETE FROM password_change_codes WHERE user_id = ?', [req.user.id]);
+    await run('UPDATE users SET password_hash = ? WHERE id = ?', [await bcrypt.hash(newPassword, 12), user.id]);
     res.json({ message: 'Password updated successfully.' });
   } catch (error) {
-    console.error('Password change confirmation failed:', error);
+    console.error('Password change failed:', error);
     res.status(500).json({ message: 'Password could not be updated. Please try again.' });
   }
 });
