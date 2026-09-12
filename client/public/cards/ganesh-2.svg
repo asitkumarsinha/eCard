@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
+  <defs>
+    <linearGradient id="g2bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4c1d95"/>
+      <stop offset="1" stop-color="#9a3412"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#g2bg)"/>
+  <rect x="36" y="36" width="1128" height="728" rx="18" fill="none" stroke="#fcd34d" stroke-width="8"/>
+  <circle cx="180" cy="160" r="6" fill="#fde68a"/>
+  <circle cx="1020" cy="210" r="7" fill="#fde68a"/>
+  <circle cx="160" cy="620" r="5" fill="#fde68a"/>
+  <circle cx="1040" cy="640" r="6" fill="#fde68a"/>
+  <ellipse cx="600" cy="430" rx="210" ry="70" fill="#6d28d9" opacity=".25"/>
+  <ellipse cx="428" cy="325" rx="88" ry="122" fill="#fcd34d"/>
+  <ellipse cx="772" cy="325" rx="88" ry="122" fill="#fcd34d"/>
+  <ellipse cx="452" cy="332" rx="48" ry="74" fill="#c2410c"/>
+  <ellipse cx="748" cy="332" rx="48" ry="74" fill="#c2410c"/>
+  <ellipse cx="600" cy="338" rx="142" ry="150" fill="#fef3c7"/>
+  <path d="M510 245 Q600 155 690 245" fill="#fbbf24"/>
+  <rect x="575" y="168" width="50" height="28" rx="8" fill="#f59e0b"/>
+  <circle cx="600" cy="160" r="16" fill="#ef4444"/>
+  <path d="M600 268 v50" stroke="#be123c" stroke-width="8" stroke-linecap="round"/>
+  <ellipse cx="548" cy="338" rx="18" ry="22" fill="#111827"/>
+  <ellipse cx="652" cy="338" rx="18" ry="22" fill="#111827"/>
+  <circle cx="553" cy="332" r="5" fill="#fff"/>
+  <circle cx="657" cy="332" r="5" fill="#fff"/>
+  <path d="M575 415 C590 490 650 530 690 490 C720 458 660 455 650 515 C638 575 710 605 745 560" fill="none" stroke="#fef3c7" stroke-width="44" stroke-linecap="round"/>
+  <ellipse cx="600" cy="560" rx="55" ry="28" fill="#fbbf24"/>
+  <ellipse cx="600" cy="548" rx="38" ry="16" fill="#f59e0b"/>
+  <text x="600" y="720" text-anchor="middle" fill="#fff7ed" font-family="Georgia, serif" font-size="42">Shubh Ganesh Chaturthi</text>
+</svg>

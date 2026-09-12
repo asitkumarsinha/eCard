@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
+  <defs>
+    <linearGradient id="g1bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#c2410c"/>
+      <stop offset="1" stop-color="#7c2d12"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#g1bg)"/>
+  <rect x="36" y="36" width="1128" height="728" rx="18" fill="none" stroke="#fde68a" stroke-width="8"/>
+  <rect x="54" y="54" width="1092" height="692" rx="12" fill="none" stroke="#fbbf24" stroke-width="2"/>
+  <circle cx="120" cy="120" r="8" fill="#fde68a"/>
+  <circle cx="1080" cy="120" r="8" fill="#fde68a"/>
+  <circle cx="120" cy="680" r="8" fill="#fde68a"/>
+  <circle cx="1080" cy="680" r="8" fill="#fde68a"/>
+  <ellipse cx="430" cy="330" rx="92" ry="128" fill="#fbbf24"/>
+  <ellipse cx="770" cy="330" rx="92" ry="128" fill="#fbbf24"/>
+  <ellipse cx="455" cy="338" rx="50" ry="78" fill="#ea580c"/>
+  <ellipse cx="745" cy="338" rx="50" ry="78" fill="#ea580c"/>
+  <ellipse cx="600" cy="345" rx="148" ry="158" fill="#fde68a"/>
+  <path d="M500 250 Q600 150 700 250" fill="#f59e0b"/>
+  <path d="M568 175 L600 108 L632 175 Z" fill="#fbbf24"/>
+  <circle cx="600" cy="142" r="13" fill="#dc2626"/>
+  <path d="M600 275 v52" stroke="#b91c1c" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="600" cy="262" r="9" fill="#b91c1c"/>
+  <ellipse cx="545" cy="345" rx="20" ry="24" fill="#1c1917"/>
+  <ellipse cx="655" cy="345" rx="20" ry="24" fill="#1c1917"/>
+  <circle cx="551" cy="338" r="6" fill="#fff"/>
+  <circle cx="661" cy="338" r="6" fill="#fff"/>
+  <path d="M568 430 C555 505 490 545 455 500 C430 465 490 470 510 525 C535 590 455 630 410 590" fill="none" stroke="#fde68a" stroke-width="46" stroke-linecap="round"/>
+  <path d="M568 430 C555 505 490 545 455 500 C430 465 490 470 510 525 C535 590 455 630 410 590" fill="none" stroke="#f59e0b" stroke-width="18" stroke-linecap="round"/>
+  <circle cx="600" cy="410" r="8" fill="#7c2d12"/>
+  <text x="600" y="720" text-anchor="middle" fill="#fff7ed" font-family="Georgia, serif" font-size="42">Ganesh Festival</text>
+</svg>

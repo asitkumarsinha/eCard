@@ -1,0 +1,137 @@
+<header><button class="brand" (click)="page.set('home')">e<span>Card</span></button><nav><button (click)="page.set('home')">Explore cards</button><button (click)="openAdmin()">Admin</button></nav></header>
+<main>
+  @if (notice()) { <div class="notice">{{ notice() }} <button (click)="notice.set('')">×</button></div> }
+  @if (loading()) { <p class="loading">Loading…</p> }
+  @if (page() === 'home') {
+    <section class="hero">
+      <img class="hero-bg" src="/covers/home-hero.png" alt="">
+      <div class="hero-copy">
+        <p class="eyebrow">MAKE SOMEONE SMILE</p>
+        <h1>Cards made <em>personal.</em></h1>
+        <p>Choose a festival or occasion, add your message, then download or share a card in moments.</p>
+        <a class="hero-cta" href="#occasions">Explore occasions</a>
+      </div>
+    </section>
+    <section class="content how">
+      <p class="eyebrow">HOW IT WORKS</p>
+      <h2>Three simple steps</h2>
+      <div class="steps">
+        <article><span>01</span><h3>Pick an occasion</h3><p>Start with Ganesh Festival, Diwali, Birthday, or any category you add.</p></article>
+        <article><span>02</span><h3>Write your message</h3><p>Choose a template and place a heartfelt note on the card.</p></article>
+        <article><span>03</span><h3>Share the joy</h3><p>Download the image or send it through WhatsApp or email.</p></article>
+      </div>
+    </section>
+    <section class="content" id="occasions">
+      <div class="section-head"><div><p class="eyebrow">EXPLORE</p><h2>Find the right occasion</h2></div><input [(ngModel)]="search" placeholder="Search categories" aria-label="Search categories"></div>
+      <div class="categories">@for (category of filteredCategories(); track category.id; let i = $index) {
+        <button class="category-card" [class.featured]="i === 0 && !search" (click)="openCategory(category)">
+          <img [src]="coverFor(category)" [alt]="category.name">
+          <div class="category-copy"><h3>{{ category.name }}</h3><p>{{ category.description }}</p><span class="arrow">Explore →</span></div>
+        </button>
+      } @empty { <p>No categories found.</p> }</div>
+    </section>
+  }
+  @if (page() === 'gallery') {
+    <section class="gallery-page" [class.ganesh-theme]="isGanesh()" [class.diwali-theme]="isDiwali()" [class.birthday-theme]="isBirthday()">
+      @if (isGanesh()) {
+        <div class="page-ornament" aria-hidden="true">
+          <svg viewBox="0 0 1200 170" preserveAspectRatio="xMidYMin meet">
+            <line x1="40" y1="18" x2="1160" y2="18" stroke="#f6d365" stroke-width="3"/>
+            <g fill="#f4d03f" stroke="#8a4b08" stroke-width="2">
+              <g transform="translate(90,18)"><line x1="30" y1="0" x2="30" y2="38" stroke="#f6d365" stroke-width="2"/><path d="M8 52 q22 -18 44 0 v38 q-22 22 -44 0z"/><circle cx="30" cy="102" r="6"/><circle cx="30" cy="46" r="7"/></g>
+              <g transform="translate(250,18)"><line x1="30" y1="0" x2="30" y2="22" stroke="#f6d365" stroke-width="2"/><path d="M10 36 q20 -16 40 0 v32 q-20 20 -40 0z"/><circle cx="30" cy="80" r="5"/><circle cx="30" cy="32" r="6"/></g>
+              <g transform="translate(430,18)"><line x1="30" y1="0" x2="30" y2="46" stroke="#f6d365" stroke-width="2"/><path d="M6 60 q24 -20 48 0 v42 q-24 24 -48 0z"/><circle cx="30" cy="114" r="7"/><circle cx="30" cy="54" r="8"/></g>
+              <g transform="translate(585,18)"><line x1="30" y1="0" x2="30" y2="28" stroke="#f6d365" stroke-width="2"/><path d="M8 44 q22 -18 44 0 v36 q-22 22 -44 0z"/><circle cx="30" cy="92" r="6"/><circle cx="30" cy="38" r="7"/></g>
+              <g transform="translate(740,18)"><line x1="30" y1="0" x2="30" y2="46" stroke="#f6d365" stroke-width="2"/><path d="M6 60 q24 -20 48 0 v42 q-24 24 -48 0z"/><circle cx="30" cy="114" r="7"/><circle cx="30" cy="54" r="8"/></g>
+              <g transform="translate(920,18)"><line x1="30" y1="0" x2="30" y2="22" stroke="#f6d365" stroke-width="2"/><path d="M10 36 q20 -16 40 0 v32 q-20 20 -40 0z"/><circle cx="30" cy="80" r="5"/><circle cx="30" cy="32" r="6"/></g>
+              <g transform="translate(1080,18)"><line x1="30" y1="0" x2="30" y2="38" stroke="#f6d365" stroke-width="2"/><path d="M8 52 q22 -18 44 0 v38 q-22 22 -44 0z"/><circle cx="30" cy="102" r="6"/><circle cx="30" cy="46" r="7"/></g>
+            </g>
+          </svg>
+        </div>
+      }
+      @if (isDiwali()) {
+        <div class="page-ornament" aria-hidden="true">
+          <svg viewBox="0 0 1200 150" preserveAspectRatio="xMidYMin meet">
+            <line x1="50" y1="16" x2="1150" y2="16" stroke="#ffd166" stroke-width="3"/>
+            <g fill="#ffd166" stroke="#9a3412" stroke-width="1.5">
+              <g transform="translate(110,16)"><line x1="24" y1="0" x2="24" y2="28" stroke="#ffd166"/><path d="M8 40 q16-14 32 0 v18 q-16 16-32 0z"/><path d="M16 78 q8-18 16 0 q-8 8-16 0z" fill="#fbbf24" stroke="none"/></g>
+              <g transform="translate(300,16)"><line x1="24" y1="0" x2="24" y2="18" stroke="#ffd166"/><rect x="8" y="28" width="32" height="22" rx="4" fill="#f59e0b"/><path d="M8 28 q16-16 32 0" fill="#fbbf24"/><circle cx="24" cy="58" r="4" fill="#fff7ed" stroke="none"/></g>
+              <g transform="translate(490,16)"><line x1="24" y1="0" x2="24" y2="34" stroke="#ffd166"/><path d="M6 48 q18-16 36 0 v20 q-18 18-36 0z"/><path d="M14 88 q10-20 20 0 q-10 9-20 0z" fill="#fbbf24" stroke="none"/></g>
+              <g transform="translate(680,16)"><line x1="24" y1="0" x2="24" y2="18" stroke="#ffd166"/><rect x="8" y="28" width="32" height="22" rx="4" fill="#f59e0b"/><path d="M8 28 q16-16 32 0" fill="#fbbf24"/><circle cx="24" cy="58" r="4" fill="#fff7ed" stroke="none"/></g>
+              <g transform="translate(870,16)"><line x1="24" y1="0" x2="24" y2="28" stroke="#ffd166"/><path d="M8 40 q16-14 32 0 v18 q-16 16-32 0z"/><path d="M16 78 q8-18 16 0 q-8 8-16 0z" fill="#fbbf24" stroke="none"/></g>
+              <g transform="translate(1040,16)"><line x1="24" y1="0" x2="24" y2="34" stroke="#ffd166"/><path d="M6 48 q18-16 36 0 v20 q-18 18-36 0z"/><path d="M14 88 q10-20 20 0 q-10 9-20 0z" fill="#fbbf24" stroke="none"/></g>
+            </g>
+          </svg>
+        </div>
+      }
+      @if (isBirthday()) {
+        <div class="page-ornament" aria-hidden="true">
+          <svg viewBox="0 0 1200 150" preserveAspectRatio="xMidYMin meet">
+            <g>
+              <g transform="translate(80,8)"><ellipse cx="22" cy="30" rx="22" ry="30" fill="#fb7185"/><path d="M22 60 q6 16 0 32" fill="none" stroke="#64748b"/><ellipse cx="14" cy="22" rx="6" ry="12" fill="#fff" opacity=".4"/></g>
+              <g transform="translate(230,18)"><ellipse cx="20" cy="28" rx="20" ry="28" fill="#38bdf8"/><path d="M20 56 q-6 14 1 30" fill="none" stroke="#64748b"/><ellipse cx="13" cy="20" rx="5" ry="10" fill="#fff" opacity=".4"/></g>
+              <g transform="translate(390,6)"><ellipse cx="24" cy="32" rx="24" ry="32" fill="#facc15"/><path d="M24 64 q7 16 0 34" fill="none" stroke="#64748b"/><ellipse cx="16" cy="24" rx="6" ry="11" fill="#fff" opacity=".4"/></g>
+              <g transform="translate(560,16)"><ellipse cx="21" cy="29" rx="21" ry="29" fill="#a78bfa"/><path d="M21 58 q-7 15 2 32" fill="none" stroke="#64748b"/><ellipse cx="14" cy="21" rx="5" ry="10" fill="#fff" opacity=".4"/></g>
+              <g transform="translate(730,8)"><ellipse cx="22" cy="30" rx="22" ry="30" fill="#34d399"/><path d="M22 60 q6 16 0 32" fill="none" stroke="#64748b"/><ellipse cx="14" cy="22" rx="6" ry="12" fill="#fff" opacity=".4"/></g>
+              <g transform="translate(900,18)"><ellipse cx="20" cy="28" rx="20" ry="28" fill="#fb7185"/><path d="M20 56 q7 14 0 30" fill="none" stroke="#64748b"/><ellipse cx="13" cy="20" rx="5" ry="10" fill="#fff" opacity=".4"/></g>
+              <g transform="translate(1050,6)"><ellipse cx="24" cy="32" rx="24" ry="32" fill="#38bdf8"/><path d="M24 64 q-6 16 1 34" fill="none" stroke="#64748b"/><ellipse cx="16" cy="24" rx="6" ry="11" fill="#fff" opacity=".4"/></g>
+            </g>
+          </svg>
+        </div>
+      }
+      <div class="content"><button class="back" (click)="page.set('home')">← All categories</button><p class="eyebrow">CHOOSE A DESIGN</p><h1>{{ selectedCategory()?.name }}</h1><p class="muted">Three templates at a time. Select one to add your message.</p>
+      <div class="templates">@for (template of visibleTemplates(); track template.id) { <button class="template-card" (click)="chooseTemplate(template)"><img [src]="template.image_url" [alt]="template.alt_text"><span>{{ template.title }}</span><small>{{ template.license_type }} · Free to use</small></button> }</div>
+      <div class="pager"><button (click)="previousTemplates()" [disabled]="galleryPage === 0">← Previous</button><span>{{ galleryPage + 1 }} / {{ Math.ceil(templates().length / 3) || 1 }}</span><button (click)="nextTemplates()" [disabled]="(galleryPage + 1) * 3 >= templates().length">More →</button></div></div>
+    </section>
+  }
+  @if (page() === 'editor') {
+    <section class="studio">
+      <img class="studio-bg" src="/covers/editor-studio.png" alt="">
+      <div class="studio-shell">
+        <button class="back studio-back" (click)="page.set('gallery')">← Templates</button>
+        <div class="studio-head">
+          <p class="eyebrow">CREATE YOUR CARD</p>
+          <h1>{{ selectedTemplate()?.title || 'Your eCard' }}</h1>
+          <p class="muted">{{ selectedCategory()?.name }} · Add a message, then download or share.</p>
+        </div>
+        <div class="editor-grid">
+          <div class="preview-pane">
+            <div class="card-stage">
+              <div class="card-preview">
+                <img [src]="selectedTemplate()?.image_url" [alt]="selectedTemplate()?.alt_text || 'Selected card'">
+                <p class="card-message" [style.color]="textColor" [style.fontSize.px]="previewFont()" [style.textAlign]="textAlign" [style.top.%]="messageTop()">{{ message || 'Your message here' }}</p>
+              </div>
+            </div>
+            <p class="license">{{ selectedTemplate()?.attribution_text }}</p>
+          </div>
+          <aside class="controls glass">
+            <p class="eyebrow">CUSTOMIZE</p>
+            <h2>Your message</h2>
+            <textarea [(ngModel)]="message" maxlength="250" placeholder="Write a heartfelt message…"></textarea>
+            <small>{{ message.length }}/250</small>
+            <div class="style-row">
+              <label>Color<input type="color" [(ngModel)]="textColor"></label>
+              <label>Size<input type="range" min="24" max="80" [(ngModel)]="textSize"></label>
+            </div>
+            <label>Alignment
+              <select [(ngModel)]="textAlign"><option value="left">Left</option><option value="center">Center</option><option value="right">Right</option></select>
+            </label>
+            <label>Position
+              <select [(ngModel)]="textPosition"><option [ngValue]="250">Top</option><option [ngValue]="440">Center</option><option [ngValue]="620">Bottom</option></select>
+            </label>
+            <button class="primary" (click)="download()">Download PNG</button>
+            <button class="secondary" (click)="shareWhatsApp()">Share on WhatsApp</button>
+            <div class="email"><input type="email" [(ngModel)]="email" placeholder="Recipient email"><button class="secondary" (click)="sendEmail()">Send</button></div>
+          </aside>
+        </div>
+      </div>
+    </section>
+  }
+  @if (page() === 'admin-login') {
+    <section class="login"><p class="eyebrow">ADMIN AREA</p><h1>Welcome back</h1><p>Sign in to manage templates and categories.</p><label>Username<input [(ngModel)]="login.username"></label><label>Password<input [(ngModel)]="login.password" type="password"></label><button class="primary" (click)="signIn()">Sign in</button><small>Development seed: admin / admin123</small></section>
+  }
+  @if (page() === 'admin') {
+    <section class="content admin"><div class="section-head"><div><p class="eyebrow">ADMIN DASHBOARD</p><h1>Manage eCard</h1></div><button class="secondary" (click)="logout()">Logout</button></div><div class="admin-grid"><form (ngSubmit)="addCategory()"><h2>Add category</h2><input [(ngModel)]="categoryForm.name" name="name" placeholder="Category name" required><input [(ngModel)]="categoryForm.slug" name="slug" placeholder="category-slug" required><textarea [(ngModel)]="categoryForm.description" name="description" placeholder="Description"></textarea><label>Order <input [(ngModel)]="categoryForm.sortOrder" name="sort" type="number"></label><label class="check"><input [(ngModel)]="categoryForm.isPublished" name="published" type="checkbox"> Published</label><button class="primary">Save category</button></form><form (ngSubmit)="uploadTemplate()"><h2>Upload template</h2><select [(ngModel)]="uploadForm.categoryId" name="templateCategory" required><option value="">Choose category</option>@for (c of adminCategories(); track c.id) { <option [value]="c.id">{{ c.name }}</option> }</select><input [(ngModel)]="uploadForm.title" name="title" placeholder="Template title" required><input [(ngModel)]="uploadForm.altText" name="alt" placeholder="Alt text" required><input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" (change)="onFile($event)" required><input [(ngModel)]="uploadForm.licenseSource" name="source" placeholder="License source" required><input [(ngModel)]="uploadForm.licenseType" name="license" placeholder="License type" required><input [(ngModel)]="uploadForm.attributionText" name="attribution" placeholder="Attribution text"><label class="check"><input [(ngModel)]="uploadForm.reuseConfirmed" name="reuse" type="checkbox"> I confirm this image is free to use.</label><button class="primary">Upload template</button></form></div><h2>Categories</h2><div class="admin-list">@for (c of adminCategories(); track c.id) { <div><span><strong>{{ c.name }}</strong><small>{{ c.is_published ? 'Published' : 'Hidden' }}</small></span><button (click)="deleteCategory(c.id)">Delete</button></div> }</div><h2>Templates</h2><div class="admin-list">@for (t of adminTemplates(); track t.id) { <div><span><strong>{{ t.title }}</strong><small>{{ t.category_name }} · {{ t.license_type }}</small></span><button (click)="deleteTemplate(t.id)">Delete</button></div> }</div></section>
+  }
+</main>
+<footer>© eCard · Privacy · Terms · Image licenses</footer>
