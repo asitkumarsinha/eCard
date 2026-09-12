@@ -1,0 +1,4 @@
+node_modules/
+ecard.db
+uploads/
+.env

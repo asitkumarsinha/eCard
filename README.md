@@ -52,19 +52,28 @@ The Docker volume `ecard-data` retains the SQLite database and uploaded template
 - Publish a Privacy Policy that discloses the admin-only visitor log (IP address, time, browser data, and referrer), its purpose, and retention period.
 - Configure HTTPS and keep Docker images/dependencies updated.
 
-## Host on Render
+## Host on Render (free)
 
-This repo includes `render.yaml` for a one-click Blueprint.
+Use **one** free Web Service so the site and API share the same URL.
 
-1. Push the project to GitHub (do not commit `.env` or `ecard.db`).
-2. In Render, open **New → Blueprint**.
-3. Select the GitHub repo.
-4. Apply the Blueprint. Render creates:
-   - `ecard-api` — Node API with a 1 GB disk for SQLite and uploads
-   - `ecard-web` — Angular static site, with `/api` and `/uploads` rewritten to the API
-5. In `ecard-api` → **Environment**, set `SMTP_HOST`, `SMTP_USER`, `SMTP_PASS`, and `SMTP_FROM`.
-6. Open the `ecard-web` URL. Sign in as Admin and change the password.
+1. Push the project to GitHub (do not commit `.env`, `ecard.db`, or `node_modules`).
+2. In Render, open your Web Service (for example `ecard-x4mp`).
+3. Set:
 
-The Blueprint uses a persistent disk, which requires a paid instance. On the free plan, SQLite data is wiped when the service restarts.
+| Field | Value |
+|--------|--------|
+| Root Directory | *leave empty* (repository root) |
+| Build Command | `npm install --prefix server && npm install --prefix client && npm run build --prefix client` |
+| Start Command | `npm start --prefix server` |
 
-If the API URL is not `https://ecard-api.onrender.com` (for example the name was already taken), edit the rewrite destinations on `ecard-web` to match the real API URL.
+4. Add environment variable `STATIC_DIR` = `/opt/render/project/src/client/dist/client/browser`
+5. Also set `NODE_VERSION=22`, `NODE_ENV=production`, `TRUST_PROXY=true`
+6. Save and **Manual Deploy → Deploy latest commit**
+
+Open `https://YOUR-SERVICE.onrender.com/` — the homepage should load.
+
+### Free-plan limits
+
+- The API sleeps after idle time. The first visit after that can take about a minute.
+- There is no persistent disk. SQLite data (admin password, uploaded cards, visitor logs) is lost when Render restarts or redeploys the API.
+- SMTP is still required for password-change emails; the site works without SMTP for browsing and downloads.

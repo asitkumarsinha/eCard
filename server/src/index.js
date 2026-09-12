@@ -272,6 +272,14 @@ app.post('/api/share/email', async (req, res) => {
   res.json({ message: 'Card sent successfully.' });
 });
 
+const staticDir = process.env.STATIC_DIR || path.join(root, '..', 'client', 'dist', 'client', 'browser');
+if (fs.existsSync(path.join(staticDir, 'index.html'))) {
+  app.use(express.static(staticDir));
+  app.get(/^(?!\/api\/|\/uploads\/).*/, (_req, res) => {
+    res.sendFile(path.join(staticDir, 'index.html'));
+  });
+}
+
 app.use((error, _req, res, _next) => {
   if (error instanceof multer.MulterError) return res.status(400).json({ message: error.message });
   console.error(error);
