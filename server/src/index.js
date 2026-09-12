@@ -278,6 +278,10 @@ if (fs.existsSync(path.join(staticDir, 'index.html'))) {
   app.get(/^(?!\/api\/|\/uploads\/).*/, (_req, res) => {
     res.sendFile(path.join(staticDir, 'index.html'));
   });
+} else {
+  app.get('/', (_req, res) => {
+    res.type('html').send('<!doctype html><html><body style="font-family:Arial;padding:40px"><h1>eCard API is running</h1><p>The website files are not in this service yet. In Render, set Root Directory to the repository root (leave it empty), then use:</p><pre>Build: npm install --prefix server &amp;&amp; npm install --prefix client &amp;&amp; npm run build --prefix client\nStart: npm start --prefix server</pre></body></html>');
+  });
 }
 
 app.use((error, _req, res, _next) => {
