@@ -21,6 +21,7 @@ export class App {
   readonly notice = signal('');
   readonly adminCategories = signal<any[]>([]);
   readonly adminTemplates = signal<any[]>([]);
+  readonly visitorLogs = signal<any[]>([]);
   search = '';
   galleryPage = 0;
   message = '';
@@ -33,9 +34,14 @@ export class App {
   categoryForm = { name: '', slug: '', description: '', sortOrder: 0, isPublished: true };
   email = '';
   uploadForm = { categoryId: '', title: '', altText: '', licenseSource: 'Original eCard artwork', licenseType: 'Original', attributionText: '© eCard', reuseConfirmed: false };
+  passwordChange = { currentPassword: '', newPassword: '', code: '' };
+  codeRequested = false;
   selectedFile?: File;
 
-  ngOnInit() { this.loadCategories(); }
+  ngOnInit() {
+    this.loadCategories();
+    this.http.post('/api/visitor-log', {}).subscribe({ error: () => undefined });
+  }
 
   loadCategories() {
     this.loading.set(true);
@@ -169,6 +175,32 @@ export class App {
   loadAdmin() {
     this.http.get<any[]>('/api/admin/categories', this.headers()).subscribe(data => this.adminCategories.set(data));
     this.http.get<any[]>('/api/admin/templates', this.headers()).subscribe(data => this.adminTemplates.set(data));
+    this.loadVisitorLogs();
+  }
+  loadVisitorLogs() {
+    this.http.get<any[]>('/api/admin/visitor-logs', this.headers()).subscribe({
+      next: data => this.visitorLogs.set(data),
+      error: () => this.visitorLogs.set([])
+    });
+  }
+  requestPasswordCode() {
+    this.http.post<any>('/api/admin/password-change/request', {
+      currentPassword: this.passwordChange.currentPassword,
+      newPassword: this.passwordChange.newPassword
+    }, this.headers()).subscribe({
+      next: result => { this.codeRequested = true; this.notice.set(result.message); },
+      error: err => this.notice.set(err.error?.message || 'Verification code could not be requested.')
+    });
+  }
+  confirmPasswordChange() {
+    this.http.post<any>('/api/admin/password-change/confirm', { code: this.passwordChange.code }, this.headers()).subscribe({
+      next: result => {
+        this.passwordChange = { currentPassword: '', newPassword: '', code: '' };
+        this.codeRequested = false;
+        this.notice.set(result.message);
+      },
+      error: err => this.notice.set(err.error?.message || 'Password could not be updated.')
+    });
   }
   addCategory() {
     if (!this.categoryForm.name || !this.categoryForm.slug) return;

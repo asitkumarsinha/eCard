@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import bcrypt from 'bcryptjs';
 import cors from 'cors';
+import crypto from 'node:crypto';
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import multer from 'multer';
@@ -12,12 +13,14 @@ import sqlite3 from 'sqlite3';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, '..');
-const uploads = path.join(root, 'uploads');
+const dataDir = process.env.DATA_DIR || root;
+const uploads = path.join(dataDir, 'uploads');
 fs.mkdirSync(uploads, { recursive: true });
-const db = new sqlite3.Database(path.join(root, 'ecard.db'));
+const db = new sqlite3.Database(path.join(dataDir, 'ecard.db'));
 const app = express();
 const port = process.env.PORT || 3000;
 const secret = process.env.JWT_SECRET || 'change-this-development-secret';
+const adminVerificationEmail = process.env.ADMIN_VERIFICATION_EMAIL || 'asitkumarsinha@gmail.com';
 
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
@@ -29,6 +32,22 @@ const all = (sql, params = []) => new Promise((resolve, reject) =>
   db.all(sql, params, (error, rows) => error ? reject(error) : resolve(rows)));
 const get = (sql, params = []) => new Promise((resolve, reject) =>
   db.get(sql, params, (error, row) => error ? reject(error) : resolve(row)));
+
+function clientIp(req) {
+  if (process.env.TRUST_PROXY === 'true') {
+    return (req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress || '').trim();
+  }
+  return req.socket.remoteAddress || '';
+}
+
+function smtpTransport() {
+  return nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: Number(process.env.SMTP_PORT || 587),
+    secure: process.env.SMTP_SECURE === 'true',
+    auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
+  });
+}
 
 function auth(req, res, next) {
   const token = req.headers.authorization?.replace('Bearer ', '');
@@ -66,6 +85,17 @@ async function initialize() {
     reuse_confirmed INTEGER DEFAULT 0, created_at TEXT DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY(category_id) REFERENCES categories(id)
   )`);
+  await run(`CREATE TABLE IF NOT EXISTS password_change_codes (
+    id INTEGER PRIMARY KEY, user_id INTEGER NOT NULL, code_hash TEXT NOT NULL,
+    new_password_hash TEXT NOT NULL, attempts INTEGER NOT NULL DEFAULT 0,
+    expires_at TEXT NOT NULL, created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(user_id) REFERENCES users(id)
+  )`);
+  await run(`CREATE TABLE IF NOT EXISTS visitor_logs (
+    id INTEGER PRIMARY KEY, visited_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    ip_address TEXT NOT NULL, path TEXT NOT NULL, user_agent TEXT,
+    referrer TEXT, language TEXT
+  )`);
   const admin = await get('SELECT id FROM users WHERE username = ?', ['admin']);
   if (!admin) await run('INSERT INTO users (username, password_hash) VALUES (?, ?)',
     ['admin', await bcrypt.hash('admin123', 12)]);
@@ -101,6 +131,19 @@ app.post('/api/auth/login', async (req, res) => {
   res.json({ token: jwt.sign({ id: user.id, role: user.role }, secret, { expiresIn: '8h' }), username: user.username });
 });
 
+app.post('/api/visitor-log', async (req, res) => {
+  try {
+    await run(
+      `INSERT INTO visitor_logs (ip_address, path, user_agent, referrer, language)
+       VALUES (?, ?, ?, ?, ?)`,
+      [clientIp(req), '/', req.get('user-agent') || '', req.get('referer') || '', req.get('accept-language') || '']
+    );
+    res.status(204).end();
+  } catch {
+    res.status(204).end();
+  }
+});
+
 app.get('/api/categories', async (_req, res) =>
   res.json(await all('SELECT * FROM categories WHERE is_published = 1 ORDER BY sort_order, name')));
 app.get('/api/categories/:slug/templates', async (req, res) => {
@@ -111,6 +154,74 @@ app.get('/api/categories/:slug/templates', async (req, res) => {
 });
 
 app.get('/api/admin/categories', auth, async (_req, res) => res.json(await all('SELECT * FROM categories ORDER BY sort_order, name')));
+app.get('/api/admin/visitor-logs', auth, async (_req, res) => {
+  res.json(await all(
+    `SELECT id, visited_at, ip_address, path, user_agent, referrer, language
+     FROM visitor_logs ORDER BY visited_at DESC LIMIT 200`
+  ));
+});
+
+app.post('/api/admin/password-change/request', auth, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    if (typeof newPassword !== 'string' || newPassword.length < 8) {
+      return res.status(400).json({ message: 'New password must contain at least 8 characters.' });
+    }
+    if (!process.env.SMTP_HOST) {
+      return res.status(503).json({ message: 'Password verification email is not configured. Add SMTP settings first.' });
+    }
+    const user = await get('SELECT * FROM users WHERE id = ?', [req.user.id]);
+    if (!user || !(await bcrypt.compare(currentPassword || '', user.password_hash))) {
+      return res.status(401).json({ message: 'Current password is incorrect.' });
+    }
+    const code = crypto.randomInt(1000, 10000).toString();
+    await run('DELETE FROM password_change_codes WHERE user_id = ?', [user.id]);
+    await run(
+      `INSERT INTO password_change_codes (user_id, code_hash, new_password_hash, expires_at)
+       VALUES (?, ?, ?, datetime('now', '+10 minutes'))`,
+      [user.id, await bcrypt.hash(code, 12), await bcrypt.hash(newPassword, 12)]
+    );
+    await smtpTransport().sendMail({
+      from: process.env.SMTP_FROM || process.env.SMTP_USER,
+      to: adminVerificationEmail,
+      subject: 'eCard admin password verification code',
+      text: `Your eCard admin password verification code is ${code}. It expires in 10 minutes. If you did not request this change, ignore this email.`
+    });
+    res.json({ message: `A 4-digit verification code was sent to ${adminVerificationEmail}.` });
+  } catch (error) {
+    console.error('Password change request failed:', error);
+    res.status(500).json({ message: 'The verification code could not be sent. Please try again.' });
+  }
+});
+
+app.post('/api/admin/password-change/confirm', auth, async (req, res) => {
+  try {
+    const code = String(req.body.code || '').trim();
+    if (!/^\d{4}$/.test(code)) return res.status(400).json({ message: 'Enter the 4-digit verification code.' });
+    const request = await get(
+      `SELECT * FROM password_change_codes
+       WHERE user_id = ? AND expires_at > CURRENT_TIMESTAMP
+       ORDER BY created_at DESC LIMIT 1`,
+      [req.user.id]
+    );
+    if (!request) return res.status(400).json({ message: 'The code expired. Request a new code.' });
+    if (request.attempts >= 5) {
+      await run('DELETE FROM password_change_codes WHERE id = ?', [request.id]);
+      return res.status(429).json({ message: 'Too many incorrect attempts. Request a new code.' });
+    }
+    if (!(await bcrypt.compare(code, request.code_hash))) {
+      await run('UPDATE password_change_codes SET attempts = attempts + 1 WHERE id = ?', [request.id]);
+      return res.status(400).json({ message: 'The verification code is incorrect.' });
+    }
+    await run('UPDATE users SET password_hash = ? WHERE id = ?', [request.new_password_hash, req.user.id]);
+    await run('DELETE FROM password_change_codes WHERE user_id = ?', [req.user.id]);
+    res.json({ message: 'Password updated successfully.' });
+  } catch (error) {
+    console.error('Password change confirmation failed:', error);
+    res.status(500).json({ message: 'Password could not be updated. Please try again.' });
+  }
+});
+
 app.post('/api/admin/categories', auth, async (req, res) => {
   const { name, slug, description = '', sortOrder = 0, isPublished = true } = req.body;
   const result = await run('INSERT INTO categories (name, slug, description, sort_order, is_published) VALUES (?, ?, ?, ?, ?)',
@@ -145,7 +256,7 @@ app.post('/api/admin/templates', auth, upload.single('image'), async (req, res) 
 });
 app.delete('/api/admin/templates/:id', auth, async (req, res) => {
   const image = await get('SELECT image_url FROM card_images WHERE id = ?', [req.params.id]);
-  if (image?.image_url.startsWith('/uploads/')) fs.rm(path.join(root, image.image_url), { force: true }, () => {});
+  if (image?.image_url.startsWith('/uploads/')) fs.rm(path.join(dataDir, image.image_url), { force: true }, () => {});
   await run('DELETE FROM card_images WHERE id = ?', [req.params.id]);
   res.status(204).end();
 });

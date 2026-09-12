@@ -1,0 +1,55 @@
+services:
+  - type: web
+    name: ecard-api
+    runtime: node
+    rootDir: server
+    plan: starter
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/categories
+    disk:
+      name: ecard-data
+      mountPath: /opt/render/project/src/data
+      sizeGB: 1
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NODE_ENV
+        value: production
+      - key: TRUST_PROXY
+        value: "true"
+      - key: DATA_DIR
+        value: /opt/render/project/src/data
+      - key: ADMIN_VERIFICATION_EMAIL
+        value: asitkumarsinha@gmail.com
+      - key: JWT_SECRET
+        generateValue: true
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_SECURE
+        value: "false"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: SMTP_FROM
+        sync: false
+
+  - type: web
+    name: ecard-web
+    runtime: static
+    rootDir: client
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist/client/browser
+    routes:
+      - type: rewrite
+        source: /api/*
+        destination: https://ecard-api.onrender.com/api/*
+      - type: rewrite
+        source: /uploads/*
+        destination: https://ecard-api.onrender.com/uploads/*
+    envVars:
+      - key: NODE_VERSION
+        value: "22"

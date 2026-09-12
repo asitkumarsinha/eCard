@@ -9,7 +9,15 @@
         <p class="eyebrow">MAKE SOMEONE SMILE</p>
         <h1>Cards made <em>personal.</em></h1>
         <p>Choose a festival or occasion, add your message, then download or share a card in moments.</p>
-        <a class="hero-cta" href="#occasions">Explore occasions</a>
+        <div class="hero-actions">
+          <a class="hero-cta" href="#occasions">Explore occasions <span>→</span></a>
+          <span class="hero-note">No sign-up needed</span>
+        </div>
+        <div class="trust-row" aria-label="eCard benefits">
+          <span>✦ Free templates</span>
+          <span>✎ Add your words</span>
+          <span>↗ Instant sharing</span>
+        </div>
       </div>
     </section>
     <section class="content how">
@@ -128,10 +136,35 @@
     </section>
   }
   @if (page() === 'admin-login') {
-    <section class="login"><p class="eyebrow">ADMIN AREA</p><h1>Welcome back</h1><p>Sign in to manage templates and categories.</p><label>Username<input [(ngModel)]="login.username"></label><label>Password<input [(ngModel)]="login.password" type="password"></label><button class="primary" (click)="signIn()">Sign in</button><small>Development seed: admin / admin123</small></section>
+    <section class="login"><p class="eyebrow">ADMIN AREA</p><h1>Welcome back</h1><p>Sign in to manage templates and categories.</p><label>Username<input [(ngModel)]="login.username"></label><label>Password<input [(ngModel)]="login.password" type="password"></label><button class="primary" (click)="signIn()">Sign in</button></section>
   }
   @if (page() === 'admin') {
-    <section class="content admin"><div class="section-head"><div><p class="eyebrow">ADMIN DASHBOARD</p><h1>Manage eCard</h1></div><button class="secondary" (click)="logout()">Logout</button></div><div class="admin-grid"><form (ngSubmit)="addCategory()"><h2>Add category</h2><input [(ngModel)]="categoryForm.name" name="name" placeholder="Category name" required><input [(ngModel)]="categoryForm.slug" name="slug" placeholder="category-slug" required><textarea [(ngModel)]="categoryForm.description" name="description" placeholder="Description"></textarea><label>Order <input [(ngModel)]="categoryForm.sortOrder" name="sort" type="number"></label><label class="check"><input [(ngModel)]="categoryForm.isPublished" name="published" type="checkbox"> Published</label><button class="primary">Save category</button></form><form (ngSubmit)="uploadTemplate()"><h2>Upload template</h2><select [(ngModel)]="uploadForm.categoryId" name="templateCategory" required><option value="">Choose category</option>@for (c of adminCategories(); track c.id) { <option [value]="c.id">{{ c.name }}</option> }</select><input [(ngModel)]="uploadForm.title" name="title" placeholder="Template title" required><input [(ngModel)]="uploadForm.altText" name="alt" placeholder="Alt text" required><input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" (change)="onFile($event)" required><input [(ngModel)]="uploadForm.licenseSource" name="source" placeholder="License source" required><input [(ngModel)]="uploadForm.licenseType" name="license" placeholder="License type" required><input [(ngModel)]="uploadForm.attributionText" name="attribution" placeholder="Attribution text"><label class="check"><input [(ngModel)]="uploadForm.reuseConfirmed" name="reuse" type="checkbox"> I confirm this image is free to use.</label><button class="primary">Upload template</button></form></div><h2>Categories</h2><div class="admin-list">@for (c of adminCategories(); track c.id) { <div><span><strong>{{ c.name }}</strong><small>{{ c.is_published ? 'Published' : 'Hidden' }}</small></span><button (click)="deleteCategory(c.id)">Delete</button></div> }</div><h2>Templates</h2><div class="admin-list">@for (t of adminTemplates(); track t.id) { <div><span><strong>{{ t.title }}</strong><small>{{ t.category_name }} · {{ t.license_type }}</small></span><button (click)="deleteTemplate(t.id)">Delete</button></div> }</div></section>
+    <section class="content admin">
+      <div class="section-head"><div><p class="eyebrow">ADMIN DASHBOARD</p><h1>Manage eCard</h1></div><button class="secondary" (click)="logout()">Logout</button></div>
+      <div class="admin-grid">
+        <form (ngSubmit)="addCategory()"><h2>Add category</h2><input [(ngModel)]="categoryForm.name" name="name" placeholder="Category name" required><input [(ngModel)]="categoryForm.slug" name="slug" placeholder="category-slug" required><textarea [(ngModel)]="categoryForm.description" name="description" placeholder="Description"></textarea><label>Order <input [(ngModel)]="categoryForm.sortOrder" name="sort" type="number"></label><label class="check"><input [(ngModel)]="categoryForm.isPublished" name="published" type="checkbox"> Published</label><button class="primary">Save category</button></form>
+        <form (ngSubmit)="uploadTemplate()"><h2>Upload template</h2><select [(ngModel)]="uploadForm.categoryId" name="templateCategory" required><option value="">Choose category</option>@for (c of adminCategories(); track c.id) { <option [value]="c.id">{{ c.name }}</option> }</select><input [(ngModel)]="uploadForm.title" name="title" placeholder="Template title" required><input [(ngModel)]="uploadForm.altText" name="alt" placeholder="Alt text" required><input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" (change)="onFile($event)" required><input [(ngModel)]="uploadForm.licenseSource" name="source" placeholder="License source" required><input [(ngModel)]="uploadForm.licenseType" name="license" placeholder="License type" required><input [(ngModel)]="uploadForm.attributionText" name="attribution" placeholder="Attribution text"><label class="check"><input [(ngModel)]="uploadForm.reuseConfirmed" name="reuse" type="checkbox"> I confirm this image is free to use.</label><button class="primary">Upload template</button></form>
+      </div>
+      <div class="admin-grid security-grid">
+        <form (ngSubmit)="requestPasswordCode()">
+          <p class="eyebrow">ACCOUNT SECURITY</p><h2>Change password</h2>
+          <p class="form-help">A 4-digit code will be sent only to asitkumarsinha@gmail.com.</p>
+          <input [(ngModel)]="passwordChange.currentPassword" name="currentPassword" type="password" placeholder="Current password" autocomplete="current-password" required>
+          <input [(ngModel)]="passwordChange.newPassword" name="newPassword" type="password" minlength="8" placeholder="New password (minimum 8 characters)" autocomplete="new-password" required>
+          <button class="primary">Send verification code</button>
+        </form>
+        <form (ngSubmit)="confirmPasswordChange()">
+          <p class="eyebrow">VERIFY CODE</p><h2>Confirm update</h2>
+          <p class="form-help">The code expires after 10 minutes. You have a maximum of 5 attempts.</p>
+          <input [(ngModel)]="passwordChange.code" name="verificationCode" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" placeholder="4-digit code" [disabled]="!codeRequested" required>
+          <button class="primary" [disabled]="!codeRequested">Update password</button>
+        </form>
+      </div>
+      <h2>Categories</h2><div class="admin-list">@for (c of adminCategories(); track c.id) { <div><span><strong>{{ c.name }}</strong><small>{{ c.is_published ? 'Published' : 'Hidden' }}</small></span><button (click)="deleteCategory(c.id)">Delete</button></div> }</div>
+      <h2>Templates</h2><div class="admin-list">@for (t of adminTemplates(); track t.id) { <div><span><strong>{{ t.title }}</strong><small>{{ t.category_name }} · {{ t.license_type }}</small></span><button (click)="deleteTemplate(t.id)">Delete</button></div> }</div>
+      <div class="log-header"><div><p class="eyebrow">PRIVATE ADMIN DATA</p><h2>Visitor log</h2><p class="form-help">IP address, visit time, browser details and referrer. Keep this data secure and disclose it in your privacy policy.</p></div><button class="secondary" (click)="loadVisitorLogs()">Refresh logs</button></div>
+      <div class="log-table-wrap"><table><thead><tr><th>Visited</th><th>IP address</th><th>Browser</th><th>Referrer</th></tr></thead><tbody>@for (log of visitorLogs(); track log.id) { <tr><td>{{ log.visited_at }}</td><td>{{ log.ip_address }}</td><td [title]="log.user_agent">{{ log.user_agent || 'Unknown' }}</td><td>{{ log.referrer || 'Direct visit' }}</td></tr> } @empty { <tr><td colspan="4">No visitor logs yet.</td></tr> }</tbody></table></div>
+    </section>
   }
 </main>
 <footer>© eCard · Privacy · Terms · Image licenses</footer>

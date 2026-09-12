@@ -1,0 +1,30 @@
+services:
+  api:
+    build: ./server
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATA_DIR: /data
+      JWT_SECRET: ${JWT_SECRET}
+      ADMIN_VERIFICATION_EMAIL: ${ADMIN_VERIFICATION_EMAIL:-asitkumarsinha@gmail.com}
+      TRUST_PROXY: "true"
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASS: ${SMTP_PASS}
+      SMTP_FROM: ${SMTP_FROM}
+    volumes:
+      - ecard-data:/data
+    restart: unless-stopped
+
+  web:
+    build: ./client
+    ports:
+      - "8080:80"
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  ecard-data:
